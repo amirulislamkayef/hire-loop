@@ -53,7 +53,7 @@
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
-    --brand: oklch(0.6 0.21 281);
+    --brand: #5c53fe;
     --brand-foreground: oklch(0.985 0 0);
     --brand-accent: oklch(0.68 0.19 30);
     --card: oklch(1 0 0);
