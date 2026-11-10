@@ -2,11 +2,13 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Eye, EyeOff, Lock, Mail, User } from "lucide-react"
+import { Eye, EyeOff, Lock, Mail, User, Building2, ShieldCheck, UserSearch } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
 export type AuthMode = "signin" | "signup"
+
+export type RoleType = "seeker" | "recruiter" | "admin"
 
 // TODO: Replace this with better-auth (`@/lib/auth-client`) once the backend
 // integration is wired up. For now it only reports the collected data.
@@ -14,7 +16,20 @@ export type AuthFormData = {
   email: string
   password: string
   name?: string
+  role?: RoleType
 }
+
+// Keep in sync with the `role` user.additionalFields enum in lib/auth.ts
+const ROLES: ReadonlyArray<{
+  value: RoleType
+  label: string
+  hint: string
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
+}> = [
+  { value: "seeker", label: "Job Seeker", hint: "Find and apply to jobs", icon: UserSearch },
+  { value: "recruiter", label: "Recruiter", hint: "Hire top talent", icon: Building2 },
+  { value: "admin", label: "Admin", hint: "Manage the platform", icon: ShieldCheck },
+]
 
 const COPY = {
   signin: {
@@ -56,6 +71,7 @@ export function AuthForm({
     email: "",
     password: "",
     name: "",
+    role: "seeker",
   })
   const [showPassword, setShowPassword] = React.useState(false)
 
@@ -71,7 +87,7 @@ export function AuthForm({
     const data: AuthFormData = {
       email: values.email,
       password: values.password,
-      ...(isSignup ? { name: values.name } : {}),
+      ...(isSignup ? { name: values.name, role: values.role } : {}),
     }
     console.log(`${mode} form data:`, data)
     onSubmit?.(data)
@@ -112,6 +128,37 @@ export function AuthForm({
               />
             </div>
           </div>
+        ) : null}
+
+        {isSignup ? (
+          <fieldset>
+            <legend className={labelClass}>I am joining as</legend>
+            <div className="grid grid-cols-3 gap-2">
+              {ROLES.map((option) => (
+                <label
+                  key={option.value}
+                  className={cn(
+                    "flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border px-2 py-4 text-center transition-colors has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-[#5C53FE]/30",
+                    values.role === option.value
+                      ? "border-[#5C53FE]/70 bg-[#5C53FE]/15 text-white"
+                      : "border-white/10 bg-[#1A1A1F] text-white/60 hover:border-white/25 hover:text-white/90"
+                  )}
+                >
+                  <input
+                    className="sr-only"
+                    type="radio"
+                    name="role"
+                    value={option.value}
+                    checked={values.role === option.value}
+                    onChange={setField("role")}
+                  />
+                  <option.icon aria-hidden className="size-5" strokeWidth={1.5} />
+                  <span className="text-sm font-medium">{option.label}</span>
+                  <span className="text-xs leading-tight text-white/40">{option.hint}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
         ) : null}
 
         <div>
